@@ -8,11 +8,14 @@ class Episodios:
     RATE = 44100
 
     def ver_episodios(self):
-        with open("episodios.csv", "r", encoding="utf-8") as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=";")
-            rows = []
-            for row in spamreader:
-                rows.insert(0,row)
+        rows = []
+        try:
+            with open("episodios.csv", "r", encoding="utf-8") as csvfile:
+                spamreader = csv.reader(csvfile, delimiter=";")
+                for row in spamreader:
+                    rows.insert(0,row)
+                return rows
+        except:
             return rows
 
     def submeter_episodio(self,api_key: str,nome_ep: str,desc_ep: str,nome_ficheiro: str,ficheiro: bytes):
