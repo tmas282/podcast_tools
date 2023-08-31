@@ -18,7 +18,6 @@ EMAIL = "your email"
 PODCAST_TITLE = "your podcast title"
 PODCAST_SUBTITLE = "your podcast description"
 PODCAST_CATEGORY = "your podcast category"
-API_KEY = "api_key for submitting podcast episodes"
 
 IMAGE_DIR = "."
 BOOK_DIR = pathlib.Path("audio")

@@ -1,13 +1,9 @@
 import csv
 import wave as wv
-import pyaudio as pa
-from index import API_KEY
-
+API_KEY = "Your api key"
 
 class Episodios:
     CHUNK = 1024
-    FORMAT = pa.paInt16
-    p = pa.PyAudio()
     CHANNELS = 2
     RATE = 44100
 
@@ -27,7 +23,7 @@ class Episodios:
                 csvfile.close()
             wf = wv.open("public/audio/{}.wav".format(nome_ficheiro), "wb")
             wf.setnchannels(self.CHANNELS)
-            wf.setsampwidth(self.p.get_sample_size(self.FORMAT))
+            wf.setsampwidth(2)
             wf.setframerate(self.RATE)
             wf.writeframes(ficheiro)
             wf.close()
