@@ -1,16 +1,10 @@
 from flask import Flask, make_response, send_from_directory, request
 from feedgen.feed import FeedGenerator
 from episodio import Episodios
-import socket, pathlib
-import os
+import pathlib, os
 
 app = Flask(__name__)
 
-
-def get_ip_address():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    return s.getsockname()[0]
 
 
 NAME = "your name"
@@ -21,7 +15,7 @@ PODCAST_CATEGORY = "your podcast category"
 
 IMAGE_DIR = "."
 BOOK_DIR = pathlib.Path("audio")
-SERVER_HOME = "http://{}".format(get_ip_address())
+SERVER_HOME = "http://127.0.0.1:5000"
 
 
 @app.route("/")
