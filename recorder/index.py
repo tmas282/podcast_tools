@@ -3,18 +3,21 @@ import keyboard
 import os
 from audio import Audio
 from verificacao import Verificar
+from submit import Submit
 
 verificacao = Verificar()
 print(
-"""
+    """
 ██████╗░░█████╗░██████╗░  ██████╗░███████╗░█████╗░░█████╗░██████╗░██████╗░███████╗██████╗░
 ██╔══██╗██╔══██╗██╔══██╗  ██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗
 ██████╔╝██║░░██║██║░░██║  ██████╔╝█████╗░░██║░░╚═╝██║░░██║██████╔╝██║░░██║█████╗░░██████╔╝
 ██╔═══╝░██║░░██║██║░░██║  ██╔══██╗██╔══╝░░██║░░██╗██║░░██║██╔══██╗██║░░██║██╔══╝░░██╔══██╗
 ██║░░░░░╚█████╔╝██████╔╝  ██║░░██║███████╗╚█████╔╝╚█████╔╝██║░░██║██████╔╝███████╗██║░░██║
 ╚═╝░░░░░░╚════╝░╚═════╝░  ╚═╝░░╚═╝╚══════╝░╚════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚══════╝╚═╝░░╚═╝                                                                           
-""")
+"""
+)
 print("[0] - Record Podcast Episode")
+print("[1] - Send Podcast Episode")
 while True:
     if keyboard.is_pressed("0"):
         os.system("cls")
@@ -30,4 +33,11 @@ while True:
         print("Starting")
         gravacao = Audio(verificacao.efeitos)
         gravacao.gravar_audio()
+        break
+    elif keyboard.is_pressed("1"):
+        Submit(
+            str(input("File name: ")),
+            str(input("Episode name: ")),
+            str(input("Episode Description: ")),
+        )
         break

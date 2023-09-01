@@ -8,14 +8,14 @@ class Verificar:
     def verificar_pastas(self):
         try:
             os.mkdir("fx")
-            self.pastas["fx"] = True
         except:
-            self.pastas["fx"] = True
+            pass
+        self.pastas["fx"] = True
         try:
             os.mkdir("output")
-            self.pastas["output"] = True
         except:
-            self.pastas["output"] = True
+            pass
+        self.pastas["output"] = True
 
     def obter_efeitos(self):
         efeitos = os.listdir("fx")

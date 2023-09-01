@@ -48,13 +48,13 @@ def home():
     for row in eps:
         if len(row) > 0:
             fe = fg.add_entry()
-            fe.id(f"{SERVER_HOME}/public/audio/{row[2]}.wav")
+            fe.id(f"{SERVER_HOME}/public/audio/{row[2]}.aac")
             fe.title(str(row[0]))
             fe.description(str(row[1]))
             fe.enclosure(
-                f"{SERVER_HOME}/public/audio/{row[2]}.wav",
-                str(os.path.getsize(f"public/audio/{row[2]}.wav")),
-                "audio/wav",
+                f"{SERVER_HOME}/public/audio/{row[2]}.aac",
+                str(os.path.getsize(f"public/audio/{row[2]}.aac")),
+                "audio/aac",
             )
     response = make_response(fg.rss_str(pretty=True))
     response.headers.set("Content-Type", "application/rss+xml; charset=utf-8")
