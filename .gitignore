@@ -1,3 +1,5 @@
 dados.txt
 rss/__pycache__/
 recorder/__pycache__/
+rss/.vscode
+recorder/.vscode

@@ -1,9 +1,5 @@
 from datetime import datetime
-import keyboard
-import pyaudio as pa
-import wave as wv
-import time
-import os
+import pyaudio as pa, wave as wv, PySimpleGUI as sg
 
 
 class Audio:
@@ -12,39 +8,55 @@ class Audio:
     CHANNELS = 2
     RATE = 44100
     p = pa.PyAudio()
+    stream_output = p.open(
+        format=FORMAT,
+        channels=CHANNELS,
+        rate=RATE,
+        input=False,
+        output=True,
+        frames_per_buffer=CHUNK,
+    )
     stream = p.open(
         format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
     )
     frames = []
-    a_gravar = True
+    a_gravar = False
     fx: list[str]
+    fx_status={
+        "a_decorrer": False,
+        "fx": "",
+        "pos": 0
+    }
 
-    def gravar_audio(self):
-        tempo_inicial = datetime.now()
-        while self.a_gravar:
-            data = self.stream.read(self.CHUNK)
-            self.frames.append(data)
-            os.system("cls")
-            print("Duration: {}seg".format((datetime.now() - tempo_inicial).seconds))
-            if keyboard.is_pressed("0"):
-                self.parar_gravacao()
+    def gravar_audio(self, fx=None):
+        mic = self.stream.read(self.CHUNK)
+        if fx:
+            self.fx_status["a_decorrer"] = True
+            self.fx_status["fx"] = fx
+            self.fx_status["pos"] = 0
+        if self.fx_status["a_decorrer"]:
+            with wv.open(f"fx/{self.fx_status['fx']}.wav", "rb") as wf:
+                if (self.fx_status["pos"] + len(mic)) > wf.getnframes():
+                    wf.setpos(pos=self.fx_status["pos"])
+                    fx_frame = wf.readframes(wf.getnframes() - self.fx_status["pos"])
+                    self.fx_status["a_decorrer"] = False
+                else:
+                    wf.setpos(pos=self.fx_status["pos"])
+                    fx_frame = wf.readframes(len(mic))
+                    self.fx_status["pos"] += len(mic)
+                wf.close()
+            self.frames.append(fx_frame)
+            self.stream_output.write(fx_frame)
+        else:
+            self.frames.append(mic)
+            self.stream_output.write(mic)
+        
 
-            for efeito in self.fx:
-                if keyboard.is_pressed(efeito):
-                    print("FX running...")
-                    self.adicionar_fx(efeito)
-
-    def adicionar_fx(self, fx_nome: str):
-        fx = wv.open("fx/" + fx_nome + ".wav", "rb")
-        duration_seconds = fx.getnframes() / fx.getframerate()
-        self.frames.append(fx.readframes(fx.getnframes()))
-        time.sleep(duration_seconds)
-
-    def parar_gravacao(self):
-        nome_do_ficheiro = str(input("Record name: "))
-        self.a_gravar = False
+    def parar_gravacao(self, nome_do_ficheiro: str):
         self.stream.stop_stream()
         self.stream.close()
+        self.stream_output.stop_stream()
+        self.stream_output.close()
         self.p.terminate()
         wf = wv.open("output/" + nome_do_ficheiro + ".wav", "wb")
         wf.setnchannels(self.CHANNELS)
@@ -55,3 +67,54 @@ class Audio:
 
     def __init__(self, fx: list[str]):
         self.fx = fx
+        layout = [
+            [
+                sg.Text("Is an FX running? False", key="-fx_status-"),
+            ],
+            [sg.Text("Before start recording, change the name of the audio file.")],
+            [sg.InputText("Nome da gravação...", key="-NOME_FICHEIRO-")],
+            [
+                sg.Button("Gravar", size=(10, 2), key="-GRAVAR-"),
+                sg.Text("Duração:"),
+                sg.Text("0 seg", key="-DURACAO-"),
+            ],
+        ]
+        temp = []
+        for i in fx:
+            temp.append(sg.Button(button_text=f"FX: {i}", key=i))
+        layout.append(temp)
+        janela = sg.Window(
+            "Gravador",
+            layout=layout,
+            resizable=True,
+        )
+        while True:
+            event, values = janela.read(timeout=1)
+            if event == sg.WIN_CLOSED:
+                break
+            elif event == "-GRAVAR-":
+                if self.a_gravar:
+                    janela["-GRAVAR-"].update("Gravar")
+                    self.a_gravar = False
+                    if values["-NOME_FICHEIRO-"] == "Nome da gravação...":
+                        self.parar_gravacao("episodio")
+                    else:
+                        self.parar_gravacao(values["-NOME_FICHEIRO-"])
+                    break
+                else:
+                    janela["-GRAVAR-"].update("Parar")
+                    self.a_gravar = True
+                    tempo_inicial = datetime.now()
+            if self.a_gravar == True:
+                janela["-DURACAO-"].update(
+                    f"{(datetime.now() - tempo_inicial).seconds} seg"
+                )
+                passou = False
+                for i in fx:
+                    if event == i:
+                        self.gravar_audio(fx=i)
+                        passou = True
+                if not passou:
+                    self.gravar_audio()
+                janela["-fx_status-"].update(f"Is an FX running? {self.fx_status['a_decorrer']}")
+        janela.close()
