@@ -22,11 +22,7 @@ class Audio:
     frames = []
     a_gravar = False
     fx: list[str]
-    fx_status={
-        "a_decorrer": False,
-        "fx": "",
-        "pos": 0
-    }
+    fx_status = {"a_decorrer": False, "fx": "", "pos": 0}
 
     def gravar_audio(self, fx=None):
         mic = self.stream.read(self.CHUNK)
@@ -50,7 +46,6 @@ class Audio:
         else:
             self.frames.append(mic)
             self.stream_output.write(mic)
-        
 
     def parar_gravacao(self, nome_do_ficheiro: str):
         self.stream.stop_stream()
@@ -67,6 +62,9 @@ class Audio:
 
     def __init__(self, fx: list[str]):
         self.fx = fx
+        with open("img/icon.png", "rb") as img:
+            icon = img.read()
+            img.close()
         layout = [
             [
                 sg.Text("Is an FX running? False", key="-fx_status-"),
@@ -87,6 +85,7 @@ class Audio:
             "Gravador",
             layout=layout,
             resizable=True,
+            icon=icon
         )
         while True:
             event, values = janela.read(timeout=1)
@@ -116,5 +115,7 @@ class Audio:
                         passou = True
                 if not passou:
                     self.gravar_audio()
-                janela["-fx_status-"].update(f"Is an FX running? {self.fx_status['a_decorrer']}")
+                janela["-fx_status-"].update(
+                    f"Is an FX running? {self.fx_status['a_decorrer']}"
+                )
         janela.close()

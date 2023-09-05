@@ -6,6 +6,9 @@ sg.theme("DarkAmber")
 
 verificacao = Verificar()
 
+with open("img/icon.png", "rb") as img:
+    icon = img.read()
+    img.close()
 janela = sg.Window(
     title="PodRecorder",
     layout=[
@@ -13,6 +16,7 @@ janela = sg.Window(
         [sg.Button("Record")],
     ],
     resizable=True,
+    icon=icon
 )
 
 while True:
