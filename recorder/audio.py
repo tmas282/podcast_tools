@@ -5,7 +5,7 @@ import pyaudio as pa, wave as wv, PySimpleGUI as sg
 class Audio:
     CHUNK = 1024
     FORMAT = pa.paInt16
-    CHANNELS = 2
+    CHANNELS = 1
     RATE = 44100
     p = pa.PyAudio()
     stream_output = p.open(
@@ -16,8 +16,15 @@ class Audio:
         output=True,
         frames_per_buffer=CHUNK,
     )
+    input_device_index=1
+    for i in range(0,  p.get_host_api_info_by_index(0).get("deviceCount")):
+        if (p.get_device_info_by_host_api_device_index(0, i).get("maxInputChannels")) > 0:
+            if i > 1:
+                input_device_index=i
+            print(p.get_device_info_by_host_api_device_index(0, i).get("maxInputChannels"))
+            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get("name"))
     stream = p.open(
-        format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK
+        format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK, input_device_index=input_device_index
     )
     frames = []
     a_gravar = False
@@ -41,8 +48,14 @@ class Audio:
                     fx_frame = wf.readframes(len(mic))
                     self.fx_status["pos"] += len(mic)
                 wf.close()
-            self.frames.append(fx_frame)
-            self.stream_output.write(fx_frame)
+            fx_final = []
+            for i in range(0, len(fx_frame), 4):
+                left_channel = int.from_bytes(fx_frame[i:i + 2], byteorder="little", signed=True)
+                right_channel = int.from_bytes(fx_frame[i + 2:i + 4], byteorder="little", signed=True)
+                mono_sample = (left_channel + right_channel) // 2
+                fx_final.append(mono_sample.to_bytes(2, byteorder="little", signed=True))
+            self.frames.append(b"".join(fx_final))
+            self.stream_output.write(b"".join(fx_final))
         else:
             self.frames.append(mic)
             self.stream_output.write(mic)
